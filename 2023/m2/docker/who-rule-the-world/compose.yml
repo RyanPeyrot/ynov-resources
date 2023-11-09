@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  registry:
+    image: registry:2
+    ports:
+      - "55000:5000"
+    volumes:
+      - registry-data:/var/lib/registry
+
+  registry-frontend:
+    image: konradkleine/docker-registry-frontend:v2
+    platform: linux/amd64
+    ports:
+      - "8080:80"
+
+    environment:
+      - ENV_DOCKER_REGISTRY_HOST=registry
+      - ENV_DOCKER_REGISTRY_PORT=55000
+    depends_on:
+      - registry
+
+  vote:
+    image: localhost:5000/who-rule-the-world-vote:latest
+    ports:
+      - "5001:80"
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+  worker:
+    image: localhost:55000/who-rule-the-world-worker:latest
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app-network
+
+  result:
+    image: localhost:55000/who-rule-the-world-result:latest
+    ports:
+      - "5002:80"
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  redis:
+    image: redis:alpine
+    networks:
+      - app-network
+
+  db:
+    image: postgres:13
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  registry-data:

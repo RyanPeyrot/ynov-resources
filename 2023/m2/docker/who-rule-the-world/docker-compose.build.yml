@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+
+  vote:
+    build:
+      context: ./vote
+      dockerfile: Dockerfile
+
+  seed-data:
+    build:
+      context: ./seed-data
+      dockerfile: Dockerfile
+
+  result:
+    build:
+      context: ./result
+      dockerfile: Dockerfile
